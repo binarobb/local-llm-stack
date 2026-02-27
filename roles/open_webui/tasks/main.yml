@@ -1,0 +1,19 @@
+- name: Deploy Open WebUI manifest
+  become: false
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ role_path }}/files/open-webui.yaml"
+    kubeconfig: "{{ lookup('env','HOME') + '/.kube/config' }}"
+
+- name: Wait for Open WebUI pod to be ready
+  become: false
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: "{{ open_webui_namespace }}"
+    label_selectors:
+      - app=open-webui
+    kubeconfig: "{{ lookup('env','HOME') + '/.kube/config' }}"
+  register: webui_pods
+  until: webui_pods.resources | length > 0 and (webui_pods.resources[0].status.containerStatuses[0].ready | default(false))
+  retries: 30
+  delay: 2

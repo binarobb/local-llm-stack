@@ -1,0 +1,10 @@
+open_webui_namespace: open-webui
+open_webui_host: webui.local
+open_webui_image: ghcr.io/open-webui/open-webui:main
+
+# this matches your working k3d-dev + ollama-ext setup
+open_webui_ollama_base_url: http://ollama-ext:11434
+
+# storage (k3s local-path-provisioner should satisfy this)
+open_webui_pvc_name: open-webui-data
+open_webui_pvc_size: 5Gi

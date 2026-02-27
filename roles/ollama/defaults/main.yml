@@ -1,0 +1,12 @@
+ollama_container_name: ollama-ext
+ollama_image: ollama/ollama:latest
+
+ollama_network: k3d-dev
+ollama_port: 11434
+
+ollama_volume: ollama-models
+ollama_models_path: /root/.ollama
+
+ollama_models:
+  - mistral:latest
+  - deepseek-coder:6.7b

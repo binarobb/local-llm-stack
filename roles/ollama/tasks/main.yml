@@ -1,0 +1,38 @@
+- name: Ensure Ollama Docker volume exists
+  community.docker.docker_volume:
+    name: "{{ ollama_volume }}"
+
+- name: Ensure Ollama container is running
+  community.docker.docker_container:
+    name: "{{ ollama_container_name }}"
+    image: "{{ ollama_image }}"
+    state: started
+    restart_policy: unless-stopped
+
+    # GPU enablement (compatible)
+    runtime: nvidia
+
+    networks:
+      - name: "{{ ollama_network }}"
+    env:
+      OLLAMA_HOST: "0.0.0.0:{{ ollama_port }}"
+    volumes:
+      - "{{ ollama_volume }}:{{ ollama_models_path }}"
+    published_ports:
+      - "{{ ollama_port }}:{{ ollama_port }}"
+
+- name: Ensure ollama-ext is attached to the k3d network
+  ansible.builtin.command: "docker network connect {{ ollama_network }} {{ ollama_container_name }}"
+  register: net_connect
+  changed_when: net_connect.rc == 0
+  failed_when: net_connect.rc not in [0, 1]
+
+- name: List currently installed Ollama models
+  ansible.builtin.command: "docker exec {{ ollama_container_name }} ollama list"
+  register: ollama_list
+  changed_when: false
+
+- name: Pull missing Ollama models only
+  ansible.builtin.command: "docker exec {{ ollama_container_name }} ollama pull {{ item }}"
+  loop: "{{ ollama_models }}"
+  when: "item.split(':')[0] not in ollama_list.stdout"

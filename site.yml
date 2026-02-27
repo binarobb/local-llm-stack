@@ -1,0 +1,7 @@
+- hosts: local
+  connection: local
+  become: true
+  roles:
+    - ollama
+    - open_webui
+
