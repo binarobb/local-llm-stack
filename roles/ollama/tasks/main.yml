@@ -21,18 +21,65 @@
     published_ports:
       - "{{ ollama_port }}:{{ ollama_port }}"
 
-- name: Ensure ollama-ext is attached to the k3d network
-  ansible.builtin.command: "docker network connect {{ ollama_network }} {{ ollama_container_name }}"
-  register: net_connect
-  changed_when: net_connect.rc == 0
-  failed_when: net_connect.rc not in [0, 1]
+    # ✅ Docker healthcheck (no curl needed)
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - >
+          bash -lc '(exec 3<>/dev/tcp/127.0.0.1/{{ ollama_port }}
+          && (echo -e "GET / HTTP/1.0\r\n\r\n" >&3)
+          && cat <&3 | grep -q "Ollama is running")'
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
 
+    # GPU enablement (compatible)
+    runtime: nvidia
+
+    networks:
+      - name: "{{ ollama_network }}"
+    env:
+      OLLAMA_HOST: "0.0.0.0:{{ ollama_port }}"
+    volumes:
+      - "{{ ollama_volume }}:{{ ollama_models_path }}"
+    published_ports:
+      - "{{ ollama_port }}:{{ ollama_port }}"
+
+- name: Wait for Ollama container to become healthy
+  ansible.builtin.command: "docker inspect -f '{{ '{{' }}.State.Health.Status{{ '}}' }}' {{ ollama_container_name }}"
+  register: ollama_health
+  changed_when: false
+  check_mode: false          # ✅ run even in --check (safe read-only)
+  until: ollama_health.stdout.strip() == "healthy"
+  retries: 30
+  delay: 2
+
+- name: Ensure Ollama container is connected to the k3d network
+  community.docker.docker_network:
+    name: "{{ ollama_network }}"
+    connected:
+      - "{{ ollama_container_name }}"
+    appends: true
+    state: present
+      
 - name: List currently installed Ollama models
   ansible.builtin.command: "docker exec {{ ollama_container_name }} ollama list"
   register: ollama_list
   changed_when: false
+  check_mode: false
 
-- name: Pull missing Ollama models only
+- name: Pull missing Ollama models only (real run)
   ansible.builtin.command: "docker exec {{ ollama_container_name }} ollama pull {{ item }}"
   loop: "{{ ollama_models }}"
-  when: "item.split(':')[0] not in ollama_list.stdout"
+  when:
+    - not ansible_check_mode
+    - "item.split(':')[0] not in ollama_list.stdout"
+
+- name: (check mode) Would pull missing Ollama models
+  ansible.builtin.debug:
+    msg: "Would pull model {{ item }} into {{ ollama_container_name }}"
+  loop: "{{ ollama_models }}"
+  when:
+    - ansible_check_mode
+    - "item.split(':')[0] not in ollama_list.stdout"

@@ -1,0 +1,19 @@
+# Ansible
+*.retry
+ansible.log
+
+# Python
+__pycache__/
+*.pyc
+
+# Kubernetes
+*.kubeconfig
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Secrets (future-proofing)
+*.env
+.env.*
