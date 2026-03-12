@@ -1,10 +1,17 @@
+# Kubernetes identity
 open_webui_namespace: open-webui
-open_webui_host: webui.local
+open_webui_name: open-webui
+
+# Container image
 open_webui_image: ghcr.io/open-webui/open-webui:main
+open_webui_port: 8080
 
-# this matches your working k3d-dev + ollama-ext setup
-open_webui_ollama_base_url: http://ollama-ext:11434
+# Ollama backend (Docker container on k3d-dev network)
+open_webui_ollama_base_url: "http://ollama-ext:11434"
 
-# storage (k3s local-path-provisioner should satisfy this)
+# Persistent storage (k3s local-path-provisioner)
 open_webui_pvc_name: open-webui-data
 open_webui_pvc_size: 5Gi
+
+# Optional / future (Ingress)
+open_webui_host: webui.local

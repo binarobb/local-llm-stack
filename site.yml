@@ -1,7 +1,12 @@
 - hosts: local
-  connection: local
-  become: true
+  become: false
+  gather_facts: false
   roles:
-    - ollama
-    - open_webui
+    - role: k3d
+      tags: [k3d]
 
+    - role: ollama
+      tags: [docker, ollama]
+
+    - role: open_webui
+      tags: [k8s, webui]

@@ -1,7 +1,10 @@
+# 1. Docker volume
 - name: Ensure Ollama Docker volume exists
   community.docker.docker_volume:
     name: "{{ ollama_volume }}"
+  tags: [docker, ollama]
 
+# 2. Ollama container (THIS is where duplicates likely exist)
 - name: Ensure Ollama container is running
   community.docker.docker_container:
     name: "{{ ollama_container_name }}"
@@ -9,19 +12,20 @@
     state: started
     restart_policy: unless-stopped
 
-    # GPU enablement (compatible)
     runtime: nvidia
 
     networks:
       - name: "{{ ollama_network }}"
+
     env:
       OLLAMA_HOST: "0.0.0.0:{{ ollama_port }}"
+
     volumes:
       - "{{ ollama_volume }}:{{ ollama_models_path }}"
+
     published_ports:
       - "{{ ollama_port }}:{{ ollama_port }}"
 
-    # ✅ Docker healthcheck (no curl needed)
     healthcheck:
       test:
         - "CMD-SHELL"
@@ -33,28 +37,9 @@
       timeout: 3s
       retries: 5
       start_period: 20s
+  tags: [docker, ollama]
 
-    # GPU enablement (compatible)
-    runtime: nvidia
-
-    networks:
-      - name: "{{ ollama_network }}"
-    env:
-      OLLAMA_HOST: "0.0.0.0:{{ ollama_port }}"
-    volumes:
-      - "{{ ollama_volume }}:{{ ollama_models_path }}"
-    published_ports:
-      - "{{ ollama_port }}:{{ ollama_port }}"
-
-- name: Wait for Ollama container to become healthy
-  ansible.builtin.command: "docker inspect -f '{{ '{{' }}.State.Health.Status{{ '}}' }}' {{ ollama_container_name }}"
-  register: ollama_health
-  changed_when: false
-  check_mode: false          # ✅ run even in --check (safe read-only)
-  until: ollama_health.stdout.strip() == "healthy"
-  retries: 30
-  delay: 2
-
+# 3. Network attach (your pasted snippet ✅)
 - name: Ensure Ollama container is connected to the k3d network
   community.docker.docker_network:
     name: "{{ ollama_network }}"
@@ -62,12 +47,15 @@
       - "{{ ollama_container_name }}"
     appends: true
     state: present
-      
+  tags: [docker, ollama]
+
+# 4. Model management (your pasted snippet ✅)
 - name: List currently installed Ollama models
   ansible.builtin.command: "docker exec {{ ollama_container_name }} ollama list"
   register: ollama_list
   changed_when: false
   check_mode: false
+  tags: [ollama, models]
 
 - name: Pull missing Ollama models only (real run)
   ansible.builtin.command: "docker exec {{ ollama_container_name }} ollama pull {{ item }}"
@@ -75,6 +63,7 @@
   when:
     - not ansible_check_mode
     - "item.split(':')[0] not in ollama_list.stdout"
+  tags: [ollama, models]
 
 - name: (check mode) Would pull missing Ollama models
   ansible.builtin.debug:
@@ -83,3 +72,4 @@
   when:
     - ansible_check_mode
     - "item.split(':')[0] not in ollama_list.stdout"
+  tags: [ollama, models]
