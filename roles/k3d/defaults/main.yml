@@ -1,0 +1,3 @@
+k3d_cluster_name: dev
+k3d_network: k3d-dev
+k3d_agents: 1

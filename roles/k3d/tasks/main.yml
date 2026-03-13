@@ -1,0 +1,21 @@
+- name: Check if k3d cluster exists
+  ansible.builtin.command: "k3d cluster list -o json"
+  register: k3d_list
+  changed_when: false
+  check_mode: false
+
+- name: Create k3d cluster (real run)
+  ansible.builtin.command: >
+    k3d cluster create {{ k3d_cluster_name }}
+    --agents {{ k3d_agents }}
+    --network {{ k3d_network }}
+  when:
+    - not ansible_check_mode
+    - k3d_cluster_name not in k3d_list.stdout
+
+- name: (check mode) Would create k3d cluster
+  ansible.builtin.debug:
+    msg: "Would create k3d cluster {{ k3d_cluster_name }} on network {{ k3d_network }}"
+  when:
+    - ansible_check_mode
+    - k3d_cluster_name not in k3d_list.stdout

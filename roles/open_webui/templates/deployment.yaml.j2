@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ open_webui_name }}
+  namespace: {{ open_webui_namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ open_webui_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ open_webui_name }}
+    spec:
+      containers:
+        - name: {{ open_webui_name }}
+          image: {{ open_webui_image }}
+          ports:
+            - containerPort: {{ open_webui_port }}
+          env:
+            - name: OLLAMA_BASE_URL
+              value: "{{ open_webui_ollama_base_url }}"
