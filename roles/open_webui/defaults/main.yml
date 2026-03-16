@@ -15,3 +15,7 @@ open_webui_pvc_size: 5Gi
 
 # Optional / future (Ingress)
 open_webui_host: webui.local
+
+# TLS (self-signed, local)
+open_webui_tls_cert: "/home/soundwave/certs/webui.crt"
+open_webui_tls_key:  "/home/soundwave/certs/webui.key"

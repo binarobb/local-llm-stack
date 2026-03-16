@@ -1,0 +1,10 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ open_webui_name }}-redirect-https
+  namespace: {{ open_webui_namespace }}
+spec:
+  redirectScheme:
+    scheme: https
+    port: "8443"
+    permanent: true

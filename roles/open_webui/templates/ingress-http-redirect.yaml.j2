@@ -1,16 +1,13 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ open_webui_name }}
+  name: {{ open_webui_name }}-http
   namespace: {{ open_webui_namespace }}
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: {{ open_webui_namespace }}-{{ open_webui_name }}-redirect-https@kubernetescrd
 spec:
   ingressClassName: traefik
-  tls:
-    - hosts:
-        - {{ open_webui_host }}
-      secretName: {{ open_webui_name }}-tls
   rules:
     - host: {{ open_webui_host }}
       http:

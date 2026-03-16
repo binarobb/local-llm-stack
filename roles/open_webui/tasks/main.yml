@@ -9,7 +9,10 @@
     - pvc.yaml.j2
     - deployment.yaml.j2
     - service.yaml.j2
+    - tls-secret.yaml.j2
+    - middleware-redirect-https.yaml.j2  
     - ingress.yaml.j2
+    - ingress-http-redirect.yaml.j2
   tags: [k8s, webui]
 
 - name: Wait for Open WebUI pod to be ready
