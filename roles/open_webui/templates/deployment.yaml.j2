@@ -21,3 +21,22 @@ spec:
           env:
             - name: OLLAMA_BASE_URL
               value: "{{ open_webui_ollama_base_url }}"
+
+env:
+  - name: WEBUI_URL
+    value: "https://webui.local:8443"
+
+  - name: CORS_ALLOW_ORIGIN
+    value: "https://webui.local:8443;http://webui.local:8081"
+
+  - name: WEBUI_SESSION_COOKIE_SECURE
+    value: "true"
+
+  - name: WEBUI_AUTH_COOKIE_SECURE
+    value: "true"
+
+  - name: WEBUI_SESSION_COOKIE_SAME_SITE
+    value: "lax"
+
+  - name: WEBUI_AUTH_COOKIE_SAME_SITE
+    value: "lax"

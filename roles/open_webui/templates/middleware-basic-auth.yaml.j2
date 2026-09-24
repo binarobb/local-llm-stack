@@ -1,0 +1,10 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ open_webui_auth_middleware_name }}
+  namespace: {{ open_webui_namespace }}
+spec:
+  basicAuth:
+    secret: {{ open_webui_auth_secret_name }}
+    removeHeader: false
+    realm: "Open WebUI"

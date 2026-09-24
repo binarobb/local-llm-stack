@@ -17,3 +17,9 @@ __pycache__/
 # Secrets (future-proofing)
 *.env
 .env.*
+
+# Ansible Vault password files (never commit)
+vault_pass.txt
+.vault_pass.txt
+**/vault_pass.txt
+**/*.vault_pass.txt

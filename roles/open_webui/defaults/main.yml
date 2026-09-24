@@ -19,3 +19,12 @@ open_webui_host: webui.local
 # TLS (self-signed, local)
 open_webui_tls_cert: "/home/soundwave/certs/webui.crt"
 open_webui_tls_key:  "/home/soundwave/certs/webui.key"
+
+# Basic Auth (Traefik)
+open_webui_auth_secret_name: open-webui-basic-auth
+open_webui_auth_middleware_name: open-webui-auth
+
+# open_webui_htpasswd_users is provided by Ansible Vault (group_vars/local/vault.yml)
+## Put your htpasswd line here OR override with extra-vars / vault
+#open_webui_htpasswd_users: |
+#  webuiadmin:$2y$05$mwjDyS5FChq/mk6s94VGQenF2OIfRgfEhNOWa81ZjFQmO0r1w6qAW
