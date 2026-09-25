@@ -3,9 +3,14 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ open_webui_pvc_name }}
   namespace: {{ open_webui_namespace }}
+
 spec:
+  storageClassName: local-path
+
   accessModes:
     - ReadWriteOnce
+
   resources:
     requests:
       storage: {{ open_webui_pvc_size }}
+

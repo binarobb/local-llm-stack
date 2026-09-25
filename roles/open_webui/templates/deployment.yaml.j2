@@ -3,40 +3,54 @@ kind: Deployment
 metadata:
   name: {{ open_webui_name }}
   namespace: {{ open_webui_namespace }}
+
 spec:
   replicas: 1
+
   selector:
     matchLabels:
       app: {{ open_webui_name }}
+
   template:
     metadata:
       labels:
         app: {{ open_webui_name }}
+
     spec:
       containers:
         - name: {{ open_webui_name }}
           image: {{ open_webui_image }}
+
           ports:
             - containerPort: {{ open_webui_port }}
+
           env:
             - name: OLLAMA_BASE_URL
               value: "{{ open_webui_ollama_base_url }}"
 
-env:
-  - name: WEBUI_URL
-    value: "https://webui.local:8443"
+            - name: WEBUI_URL
+              value: "https://webui.local:8443"
 
-  - name: CORS_ALLOW_ORIGIN
-    value: "https://webui.local:8443;http://webui.local:8081"
+            - name: CORS_ALLOW_ORIGIN
+              value: "https://webui.local:8443;http://webui.local:8081"
 
-  - name: WEBUI_SESSION_COOKIE_SECURE
-    value: "true"
+            - name: WEBUI_SESSION_COOKIE_SECURE
+              value: "true"
 
-  - name: WEBUI_AUTH_COOKIE_SECURE
-    value: "true"
+            - name: WEBUI_AUTH_COOKIE_SECURE
+              value: "true"
 
-  - name: WEBUI_SESSION_COOKIE_SAME_SITE
-    value: "lax"
+            - name: WEBUI_SESSION_COOKIE_SAME_SITE
+              value: "lax"
 
-  - name: WEBUI_AUTH_COOKIE_SAME_SITE
-    value: "lax"
+            - name: WEBUI_AUTH_COOKIE_SAME_SITE
+              value: "lax"
+
+          volumeMounts:
+            - name: webui-data
+              mountPath: /app/backend/data
+
+      volumes:
+        - name: webui-data
+          persistentVolumeClaim:
+            claimName: open-webui-data
